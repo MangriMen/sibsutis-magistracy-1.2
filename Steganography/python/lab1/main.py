@@ -57,17 +57,11 @@ def encode_cmd(args):
     )
     print(f"- PSNR: {stego.psnr(image_array, stego_array, image.mode):.2f} dB")
 
-    diff_path = os.path.splitext(args.output)[0] + "_difference.bmp"
-    diff_img, max_diff, attack_array = stego.generate_difference_image(
-        image_array, stego_array, image
-    )
+    attack_path = os.path.splitext(args.output)[0] + "_difference.bmp"
+    attack_img = stego.generate_lsb_attack_image(stego_img)
 
-    attack_img = Image.fromarray(attack_array)
-    attack_img.save(diff_path + "atk.bmp")
-
-    diff_img.save(diff_path)
-    print(f"Max single pixel difference: {max_diff}")
-    print(f"Difference map saved to {diff_path}")
+    attack_img.save(attack_path)
+    print(f"Visual attack image saved to {attack_path}")
 
     stego_img.save(args.output)
 

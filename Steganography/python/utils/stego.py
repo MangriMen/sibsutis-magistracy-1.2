@@ -23,49 +23,37 @@ def psnr(original: np.ndarray, distorted: np.ndarray, mode: str) -> float:
     return psnr
 
 
-def generate_difference_image(
-    original: np.ndarray,
-    stego: np.ndarray,
-    base_img: Image.Image,
-    amplification_factor: int = 50,
-) -> tuple[Image.Image, int]:
-    # Check sizes
-    if original.shape != stego.shape:
-        raise ValueError("Images must be the same size")
+def generate_lsb_attack_image(
+    stego_img: Image.Image,
+) -> Image.Image:
+    img_array = np.array(stego_img)
 
-    diff = np.abs(original.astype(int) - stego.astype(int))
-    max_diff = diff.max()
+    if stego_img.mode == "P":
+        indices = np.array(stego_img.getdata(), dtype=np.uint8).reshape(
+            stego_img.size[::-1]
+        )
+        lsb = (indices & 1) * 255
+        attack_img = Image.fromarray(lsb.astype(np.uint8), mode="L")
 
-    # Amplify difference and clip to pixel range
-    amplified = np.clip(diff * amplification_factor, 0, 255).astype(np.uint8)
+    elif stego_img.mode == "L":
+        # Для grayscale берем LSB пикселя
+        lsb = (img_array & 1) * 255
+        attack_img = Image.fromarray(lsb, mode="L")
 
-    if base_img.mode == "P" and base_img.getpalette() is not None:
-        # 8-bit with palette
-        diff_img = Image.fromarray(amplified, mode="P")
-        diff_img.putpalette(base_img.getpalette())
-    elif base_img.mode == "L":
-        # 8-bit grayscale
-        diff_img = Image.fromarray(amplified, mode="L")
-    elif base_img.mode == "RGB":
-        # 24-bit diff per channel
-        if len(original.shape) == 3 and original.shape[2] == 3:
-            # Combine RGB channels
-            combined_diff = np.sum(amplified, axis=2) // 3
-            diff_img = Image.fromarray(combined_diff.astype(np.uint8), mode="L")
-        else:
-            raise ValueError("Image must be 24-bit in this case")
+    elif stego_img.mode == "RGB":
+        # Для RGB проверяем LSB каждого канала (B, G, R)
+        lsb_r = img_array[:, :, 0] & 1  # Red
+        lsb_g = img_array[:, :, 1] & 1  # Green
+        lsb_b = img_array[:, :, 2] & 1  # Blue
+
+        # Если хотя бы один канал содержит бит=1, пиксель белый
+        lsb_combined = ((lsb_r | lsb_g | lsb_b) * 255).astype(np.uint8)
+        attack_img = Image.fromarray(lsb_combined, mode="L")
+
     else:
-        raise ValueError(f"Unsupported bmp mode: {base_img.mode}")
+        raise ValueError(f"Unsupported image mode: {stego_img.mode}")
 
-    attack_img = stego.copy().flatten()
-
-    for i in range(len(attack_img)):
-        if (attack_img[i] & 1) == 0:
-            attack_img[i] = 0
-        elif (attack_img[i] & 1) == 1:
-            attack_img[i] = 255
-
-    return diff_img, max_diff, attack_img
+    return attack_img
 
 
 def mse_8bit(original: np.ndarray, distorted: np.ndarray) -> float:

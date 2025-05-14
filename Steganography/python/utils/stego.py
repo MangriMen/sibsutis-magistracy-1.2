@@ -23,10 +23,6 @@ def psnr(original: np.ndarray, distorted: np.ndarray, mode: str) -> float:
     return psnr
 
 
-import numpy as np
-from PIL import Image
-
-
 def generate_difference_image(
     original: np.ndarray,
     stego: np.ndarray,
@@ -61,7 +57,15 @@ def generate_difference_image(
     else:
         raise ValueError(f"Unsupported bmp mode: {base_img.mode}")
 
-    return diff_img, max_diff
+    attack_img = stego.copy().flatten()
+
+    for i in range(len(attack_img)):
+        if (attack_img[i] & 1) == 0:
+            attack_img[i] = 0
+        elif (attack_img[i] & 1) == 1:
+            attack_img[i] = 255
+
+    return diff_img, max_diff, attack_img
 
 
 def mse_8bit(original: np.ndarray, distorted: np.ndarray) -> float:

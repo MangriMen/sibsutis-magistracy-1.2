@@ -10,7 +10,7 @@ if (-not (Test-Path $inputFolder -PathType Container)) {
 
 # Обрабатываем все файлы в указанной папке
 Get-ChildItem -Path "$inputFolder\*" | ForEach-Object {
-    # Write-Host "Обработка файла: $($_.FullName)"
+    Write-Host "$($_.FullName)"
     java -jar RSAnalysis.jar $_.FullName
 }
 

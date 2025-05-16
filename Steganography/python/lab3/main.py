@@ -44,12 +44,10 @@ def main():
     psnr_val = stego.psnr(cover_img, stego_img, input_img.mode)
     capacity = embedded_bits / (full_img.shape[0] * full_img.shape[1])
 
-    print("Встраивание завершено.")
-    print(f"Встроено бит: {embedded_bits}")
-    print(f"Емкость (бит/пиксель): {capacity:.4f}")
+    print(f"Embed bits: {embedded_bits/8}")
+    print(f"Capacity (bit/pixel): {capacity:.4f}")
     print(f"PSNR: {psnr_val:.2f} dB")
-    print(f"Извлечённый текст: {output_text}")
-    print(f"Совпадает: {output_text == message}")
+    # print(f"Извлечённый текст: {output_text}")
 
 
 if __name__ == "__main__":

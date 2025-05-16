@@ -668,28 +668,29 @@ public class RSAnalysis extends PixelBenchmark {
             System.exit(1);
         }
         try {
-            System.out.println("\nRS Analysis results");
-            System.out.println("-------------------");
+            // System.out.println("\nRS Analysis results");
+            // System.out.println("-------------------");
             RSAnalysis rsa = new RSAnalysis(2, 2);
             BufferedImage image = ImageIO.read(new File(args[0]));
             double average = 0;
             double[] results = rsa.doAnalysis(image, RSAnalysis.ANALYSIS_COLOUR_RED, true);
-            System.out.println("Result from red: " + results[26]);
+            // System.out.println("Result from red: " + results[26]);
             average += results[26];
             results = rsa.doAnalysis(image, RSAnalysis.ANALYSIS_COLOUR_GREEN, true);
-            System.out.println("Result from green: " + results[26]);
+            // System.out.println("Result from green: " + results[26]);
             average += results[26];
             results = rsa.doAnalysis(image, RSAnalysis.ANALYSIS_COLOUR_BLUE, true);
-            System.out.println("Result from blue: " + results[26]);
+            // System.out.println("Result from blue: " + results[26]);
             average += results[26];
             average = average / 3;
-            System.out.println("Average result: " + average);
+            System.out.printf("Average result: %.2f%%\n", (average * 100));
+            List<String> result_names = Collections.list(rsa.getResultNames());
+            System.out.println(result_names.get(27) + ": " + results[27]);
             System.out.println();
 
-            List<String> result_names = Collections.list(rsa.getResultNames());
-            for (int i = 0; i < results.length; i++) {
-                System.out.println(result_names.get(i) + ": " + results[i]);
-            }
+            // for (int i = 0; i < results.length; i++) {
+            //     System.out.println(result_names.get(i) + ": " + results[i]);
+            // }
 
         } catch (Exception e) {
             System.out.println("ERROR: Cannot process that image type, please try another image.");
